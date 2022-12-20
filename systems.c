@@ -50,9 +50,11 @@ void print_matrix(data** matrix, int n, int m)
 
 void destruct(double** matrix, int lines)
 {
+	free(matrix[0]);
+
 	for (int i = 0; i < lines; i++)
 	{
-		free(matrix[i]);
+		matrix[i] = NULL;
 	}
 	free(matrix);
 }
@@ -286,5 +288,5 @@ int main()
 	}	
 
 	destruct(matrix, lines);
-	free (res   );
+	free (res);
 }
