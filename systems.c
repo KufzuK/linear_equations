@@ -1,7 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
+#include <math.h>
 
 typedef double data;
+
+
+double EPSYLON = 1e-14;
 
 #if(0)
 typedef struct
@@ -59,16 +64,41 @@ void destruct(double** matrix, int lines)
 	free(matrix);
 }
 
+
+//--------------------------------------------------------------------------------------------------------------
+
+
+double triangle_det(double** matrix, int n)
+{
+	
+	double s = 1.0;
+	for (int i = 0; i < n; i++)
+		{
+			if (matrix[i][i] == 0)
+				return 0;
+	
+			s *= matrix[i][i];
+		}
+	return s;
+}
+
 //------------------------------------------------------------------------------------------------------
 
 
 double** to_triangle(data** matrix, int n)
 {
+	if (matrix == NULL)
+	{
+		printf("tryndets\n");
+		return NULL;
+	}
+
+
 	if (n < 1)
 		return NULL;
 
 	if (n == 1)
-		return matrix;
+		return matrix;	
 
 
 	for (int i = 1; i < n; i++)
@@ -93,13 +123,147 @@ double** to_triangle(data** matrix, int n)
 
 			for (int k = 0; k < n; k++)
 			{
-				matrix[i][k] -= koef *  matrix[j][k];
+				double x = koef * matrix[j][k];
+
+				if (fabs(x) < EPSYLON)
+				{
+					matrix[i][k] = 0;
+					continue;
+				}
+				matrix[i][k] -= x;
+				
+			}
+		}
+	}
+	
+	if (triangle_det(matrix, n) == 0)
+		return NULL;
+
+	return matrix;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+
+/// for matrixes n * (n + 1)
+double** triangle_expanded(double** matrix, int lines)
+{
+	if (matrix == NULL)
+		return NULL;
+
+	if (lines  ==    1)
+		return matrix;
+
+	if (lines   <    1)
+		return NULL;
+
+
+	for     (int i = 1; i < lines; i++)
+	{
+		for (int j = 0; j < i;     j++)	
+		{
+
+			
+			if (matrix[i][j] == 0)
+				continue;
+
+				
+			if (matrix[j][j] == 0)
+			{
+				for (int c = 0; c < lines; c++)
+				{
+					matrix[j][c] += matrix[i][c];	
+				}
+
+			}
+
+
+			double koef = matrix[i][j] / matrix[j][j];
+
+			for (int k = 0; k < lines + 1; k++)
+			{
+				double x = koef * matrix[j][k];
+
+				if (fabs(matrix[i][k] - x) < EPSYLON)
+				{
+					matrix[i][k] = 0;
+					continue;
+				}
+				matrix[i][k] -= x;
+				
+			}
+		}
+	}
+	
+	if (triangle_det(matrix, lines) == 0)
+		return NULL;
+
+	return matrix;
+}
+
+
+//------------------------------------------------------------------------------------------------------------
+
+
+///case of n equations for n - 1 variables will be considered later
+
+double** to_diagonal(double** matrix, int lines)
+{
+	double** mat = triangle_expanded(matrix, lines);
+	
+	if (mat == NULL)
+		return NULL;
+
+	matrix = mat;
+	
+	for (int i = lines - 2; i >= 0; i--)
+	{
+		for (int j = lines - 1; j > i; j--)	
+
+		{
+
+			if (matrix[i][j] == 0)
+				continue;
+
+			
+			if (matrix[j][j] == 0)
+			{
+				return NULL; // undef_sol
+			}
+
+
+			double koef = matrix[i][j] / matrix[j][j];
+
+			double x    = koef *  matrix[j][j];
+			double y    = koef *  matrix[j][lines];
+				
+				
+			if (fabs(matrix[i][j] - x) < EPSYLON)
+			{
+				matrix[i][j] = 0;
+			}
+			else
+			{
+				matrix[i][j] -= x;
+			}
+
+
+
+			if (fabs(matrix[i][j] - y) < EPSYLON)
+			{
+				matrix[i][lines] = 0;
+			}
+			else
+			{
+				matrix[i][lines] -= y;			
 			}
 
 		}
 
+
 	}
-	return matrix;
+	return matrix; 
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -136,16 +300,6 @@ double** to_triangle_expanded(data** matrix, int lines, int exception)
 			double koef = matrix[i][j] / matrix[j][j];
 
 			for (int k = 0; k < lines; k++)
-			{
-				if (k == exception)
-				{
-					k = lines;
-				}
-				matrix[i][k] -= koef *  matrix[j][k];
-			}
-
-		}
-
 
 	}
 	return matrix;
@@ -153,22 +307,6 @@ double** to_triangle_expanded(data** matrix, int lines, int exception)
 
 #endif
 
-
-//--------------------------------------------------------------------------------------------------------------
-
-
-double triangle_det(double** matrix, int n)
-{
-	double s = 1.0;
-	for (int i = 0; i < n; i++)
-		{
-			if (matrix[i][i] == 0)
-				return 0;
-	
-			s *= matrix[i][i];
-		}
-	return s;
-}
 
 //--------------------------------------------------------------------------------------------------------------
 
@@ -225,6 +363,21 @@ double det_expanded(double** matrix, int lines, int except)
 {
 	double** mat = NULL;
 	mat = expand_mat(matrix, lines, except);
+
+	if (mat == NULL)
+		return 0;
+
+	matrix = mat;
+
+	mat = to_triangle(matrix, lines);   // somewhere here might be a problem
+
+	if (mat == NULL)
+	{
+		printf("ops");
+		return 0;
+	}
+	
+	matrix = mat;
 	
 	mat = to_triangle(mat, lines);
 
@@ -239,54 +392,116 @@ double det_expanded(double** matrix, int lines, int except)
 
 double* solve_line_syst3(double** matrix, int lines)
 {
-	double d  = det_expanded(matrix, lines, 3);
+	double* dets = (double*) calloc(lines + 1, sizeof(double));
+	double* res  = (double*) calloc(lines,     sizeof(double));
 
-	double d0 = det_expanded(matrix, lines, 0);
-	double d1 = det_expanded(matrix, lines, 1);
-	double d2 = det_expanded(matrix, lines, 2);
+	dets[0] = det_expanded(matrix, lines, lines);
 	
-	if (d == 0)
+	if (dets[0] == 0)
 		return NULL;
 
 	
-	double x1 = d0 / d;
-	double x2 = d1 / d;
-	double x3 = d2 / d;
-	
-	double* res = NULL;
-	res = (double*) calloc(3, sizeof(double));
-	
-	res[0] = x1;	
-	res[1] = x2;
-	res[2] = x3;
-	
-	
+	for (int i = 0; i < lines; i++)
+	{
+		dets[i + 1] = det_expanded(matrix, lines, i);
+	}
+
+	for (int i = 0; i < lines; i++)
+	{
+		res[i] = dets[i + 1] / dets[0];
+	}
+
+	free(dets);
+
 	return res;
 }
 
+double* solve_diagonal(double** matrix, int lines)
+{
+	if (matrix == NULL)
+	{
+		
+		return NULL; // probably, better to print 'no sollution' from here
+	}
+	
+	double* res = (double*) calloc(lines, sizeof(double));
+	
+	for (int i = 0; i < lines; i++)
+	{
+		res[i] = matrix[i][lines] / matrix[i][i];	
+	}
 
+	return res;
+
+}
 //----------------------------------------------------------------------------------------------------------------------------------
+
 
 int main()
 {
-	int lines   = 3;
-	int columns = 3;
-	data** matrix = read_matrix(lines, columns + 1);
+	struct timeval stop, start;
+	gettimeofday(&start, NULL);
 	
-	double* res = NULL;
-	res = solve_line_syst3(matrix, lines);
 	
-	if (res == NULL)
+	
+	int lines   = 0;
+
+	scanf("%d \n", &lines);
+	
+	if (lines < 1)
+		return 0;
+
+	data** matrix = read_matrix(lines, lines + 1);
+
+	
+	
+	#if(0)  // if works, #ifdef(Kramer)
+	double* res1 = NULL;
+	res1 = solve_line_syst3(matrix, lines);
+	
+	if (res1 == NULL)
 	{
 		printf("NO");
+		//return 0;
+	}
+	else
+	{
+		printf("first option\n");	
+	
+
+		for (int i = 0; i < lines; i++)
+		{
+			printf("%lg\n", res1[i]);
+		}
+	}
+
+	#endif
+
+
+
+
+	double** mat = to_diagonal(matrix, lines);
+	if (mat == NULL)
+	{
+		printf ("NO, everything bad. Either too many equtions, or no real sollution\n");
+		///case of n equations for n - 1 variables will be considered later
 		return 0;
 	}
 	
-	for (int i = 0; i < 3; i++)
-	{
-		printf("%lg\n", res[i]);
-	}	
+	double* res2 = solve_diagonal(mat, lines);	
 
 	destruct(matrix, lines);
-	free (res);
+	
+
+	for (int i = 0; i < lines; i++)
+	{
+		printf("%lg\n", res2[i]);
+	}
+
+	free(res2);
+
+	gettimeofday(&stop, NULL);
+	printf("time %lu микросекунд \n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
+	
+	return 0;
 }
