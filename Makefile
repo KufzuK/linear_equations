@@ -4,7 +4,7 @@ SRC_DIR = src/
 BUILD_DIR = build/
 TESTS_DIR = tests/
 CC = gcc
-
+CRAMER = -D Cramer
 
 all:
 	@echo 'probably.., compiling' 

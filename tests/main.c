@@ -18,8 +18,7 @@ int main()
 	data** matrix = read_matrix(lines, lines + 1);
 
 	
-	
-	#if(0)  // if works, #ifdef(Kramer)
+	#ifdef Cramer
 	double* res1 = NULL;
 	res1 = solve_line_syst3(matrix, lines);
 	
@@ -39,10 +38,14 @@ int main()
 		}
 	}
 
+	free(res1);
+
 	#endif
 
 
-
+	#ifndef Cramer
+		
+	printf("right answers");
 
 	double** mat = to_diagonal(matrix, lines);
 	if (mat == NULL)
@@ -63,6 +66,7 @@ int main()
 	}
 
 	free(res2);
+	#endif    // diagonal
 
 	gettimeofday(&stop, NULL);
 	printf("time %lu микросекунд \n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
