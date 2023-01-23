@@ -11,10 +11,20 @@
 typedef double data;
 
 
+typedef struct ready_matrix
+{
+	double** matr_ptr;
+	double*  line_ptr;
 
-struct matrix_info;
-typedef struct matrix_info info;
+	int         lines;
+	int       columns;
+	int           det;
 
+} ready_mat;
+
+struct  matrix_info;
+
+typedef struct matrix_info       info;
 
 
 
@@ -31,6 +41,13 @@ double** copy_mat(double** matrix, int lines, int columns);
 
 
 
+
+
+
+/// general function for matrixes as structures
+
+void print_matrix2(ready_mat* matr);
+///                          **************************************************
 
 
 
@@ -64,6 +81,29 @@ double* solve_diagonal(double** matrix, int lines);
 
 ///                         *************************************************** 
 
+
+
+
+
+
+
+
+/// for tests               ***************************************************
+
+
+
+ready_mat* create_blank_matrix(int lines, int columns);
+
+ready_mat* init_matrix(int lines);
+
+void feel_diagonal(ready_mat* matr);
+
+void rand_line_change(ready_mat* matr);
+
+void change_matrix(ready_mat* matr);
+
+
+///                         *************************************************** 
 
 
 

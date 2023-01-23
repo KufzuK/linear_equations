@@ -45,7 +45,7 @@ int main()
 
 	#ifndef Cramer
 		
-	printf("right answers");
+	printf("right answers\n");
 
 	double** mat = to_diagonal(matrix, lines);
 	if (mat == NULL)
@@ -67,6 +67,24 @@ int main()
 
 	free(res2);
 	#endif    // diagonal
+
+
+/*
+	//ready_mat* matr = init_matrix(4);
+	ready_mat* matr = init_matrix(4);
+	//printf("%d", matr->lines);
+	printf("\n");
+	
+	print_matrix2(matr);
+
+	printf("\n");
+	change_matrix(matr);
+	printf("\n");
+	print_matrix (matr->matr_ptr, matr->lines, matr->columns);
+	
+	destruct(matr->matr_ptr, matr->lines);
+	free(matr);	
+*/
 
 	gettimeofday(&stop, NULL);
 	printf("time %lu микросекунд \n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
