@@ -5,7 +5,7 @@ int main()
 {
 	struct timeval stop, start;
 	gettimeofday(&start, NULL);
-	
+	//srand(time(NULL));
 	
 	
 	int lines   = 0;
@@ -15,7 +15,7 @@ int main()
 	if (lines < 1)
 		return 0;
 
-	data** matrix = read_matrix(lines, lines + 1);
+	ready_mat* matr = read_matrix(lines, lines + 1);
 
 	
 	#ifdef Cramer
@@ -42,7 +42,7 @@ int main()
 
 	#endif
 
-
+	/*
 	#ifndef Cramer
 		
 	printf("right answers\n");
@@ -67,6 +67,7 @@ int main()
 
 	free(res2);
 	#endif    // diagonal
+*/
 
 
 /*
@@ -85,6 +86,17 @@ int main()
 	destruct(matr->matr_ptr, matr->lines);
 	free(matr);	
 */
+
+	solve_syst(matr);
+//	print_mass(matr->sollution, matr->lines);
+	//destruct
+
+	/*for (int i = 0; i < matr->lines; i++)
+	{
+		printf("%lg \n", matr->sollution[i]);
+	}*/
+
+	print_vline(matr->sollution, matr->lines);
 
 	gettimeofday(&stop, NULL);
 	printf("time %lu микросекунд \n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);

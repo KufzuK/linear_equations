@@ -11,8 +11,9 @@ ready_mat* create_blank_matrix(int lines, int columns)
 	ready_mat* matr = (ready_mat*) calloc(1,               sizeof(ready_mat));
 
 
-	double*    line = (double*   ) calloc(columns * lines, sizeof(double   ));
-	double** matrix = (double**  ) calloc(          lines, sizeof(double*  ));	
+	double*      line = (double* ) calloc(columns * lines, sizeof(double ));
+	double**   matrix = (double**) calloc(          lines, sizeof(double*));		
+	double* sollution = (double* ) calloc(          lines, sizeof(double ));
 
 	for (int i = 0; i < lines; i++)
 	{
@@ -20,11 +21,12 @@ ready_mat* create_blank_matrix(int lines, int columns)
 	}
 
 	
-	matr->matr_ptr  =  matrix;
-	matr->line_ptr  =    line;
-	matr->   lines  =   lines;
-	matr-> columns  = columns;
-	matr->     det  =       0;
+	matr->matr_ptr  =    matrix;
+	matr->line_ptr  =      line;
+	matr->   lines  =     lines;
+	matr-> columns  =   columns;
+	matr->     det  =         0;
+	matr->sollution = sollution;
 
 
 	return matr;
@@ -35,6 +37,7 @@ ready_mat* init_matrix(int lines)
 	ready_mat* matr = (ready_mat*) calloc(1,                   sizeof(ready_mat));
 	double*    line = (double*   ) calloc((lines + 1) * lines, sizeof(double   ));
 	double** matrix = (double**  ) calloc(              lines, sizeof(double*  ));
+	int*  sollution = (int*      ) calloc(              lines, sizeof(int      ));
 
 
 	for (int i = 0; i < lines; i++)
@@ -42,6 +45,7 @@ ready_mat* init_matrix(int lines)
 		matrix[i]        = &line[i * (lines + 1)];
 		matrix[i][i]     =                      1;
 		matrix[i][lines] =       rand() % 100 - 0;
+		sollution[i]     =       matrix[i][lines];
 	}
 	
 	matr->matr_ptr  =    matrix;
@@ -66,7 +70,7 @@ void feel_diagonal(ready_mat* matr)
 	
 	for (int i = 0; i < matr->lines; i++)
 	{
-	int x = rand() % 100 - 0;
+	int x = rand() %  10 - 0;
 
 	matr->matr_ptr[i][i] = x;
 	det *= x;					
@@ -77,28 +81,30 @@ void feel_diagonal(ready_mat* matr)
 
 void rand_line_change(ready_mat* matr)
 {
-	srand(time(NULL));
+	//srand(time(NULL));
 
-	int line_changed = rand() % (matr->lines - 1);
-	int line_added   = rand() % (matr->lines - 1);
-	int koef         = rand() %                15;
+	int line_changed =     rand() %  matr->lines;
+	int line_added   =     rand() %  matr->lines;
+	int koef         = 1 + rand() %            4;
 
 	for (int i = 0; i <= matr->lines; i++)
 	{
 		matr->matr_ptr[line_changed][i] += koef * matr->matr_ptr[line_added][i];
+		//printf("matr_ptr[%d][%d] += %d * matr_ptr[%d][%d] \n", line_changed, i, koef, line_added, i);
 	}
 
 
-	printf("changed line %d, added line %d, koef %d \n", line_changed, line_added,  koef);
+	printf("changed line %d, added line %d, koef %d \n", line_changed + 1, line_added + 1, koef);
 }	
 
 void change_matrix(ready_mat* matr)
 {
-	for (int j = 0; j < 20 * matr->lines; j++)
+	for (int j = 0; j < matr->lines * matr->lines; j++)
 	{
 		rand_line_change(matr);
+		//printf("%d change \n", j);
 		print_matrix2(matr);
-		printf("%d change \n", j);
+		printf("\n");
 	}
 
 }
@@ -115,28 +121,11 @@ void print_matrix2(ready_mat* matr)
 	}
 }
 
-
-/*int main()
+/*int test_prog()
 {
-	int lines = 2, columns = 2;
-	
-	srand(time(NULL));
+	int size = rand() % 12;
+	ready_mat* matr = init_matrix(size);
+	change_matrix(matr);
 
-	int x = rand() % 1000 - 0;
-	printf("%d \n", x);
-	
-	//double*    line = (double* ) calloc( columns * lines, sizeof(double ));
-	//double** matrix = (double**) calloc(           lines, sizeof(double*));
-
-	ready_mat* matr = create_blank_matrix(lines, columns);
-	feel_diagonal(matr);
-
-	for (int i = 0; i < lines; i++)
-	{
-		matrix[i] = &line[i * columns];
-	}
-
-
-	printf("%lg", matr->matr_ptr[1][1]);
-}	*/
+}*/
 	

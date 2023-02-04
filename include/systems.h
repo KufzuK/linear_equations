@@ -15,6 +15,7 @@ typedef struct ready_matrix
 {
 	double** matr_ptr;
 	double*  line_ptr;
+	double* sollution;
 
 	int         lines;
 	int       columns;
@@ -29,14 +30,19 @@ typedef struct matrix_info       info;
 
 
 /// here general functions: ***************************************************
-data** read_matrix(int n, int m);
+ready_mat* read_matrix(int n, int m);
 
-void print_matrix(data** matrix, int n, int m);
+void print_matrix(ready_mat* matr);
 
-void destruct(double** matrix, int lines);
+void destruct_2d(double** matrix, int lines);
 
-double** copy_mat(double** matrix, int lines, int columns);
+void destruct(ready_mat* matr);
 
+ready_mat* copy_mat(ready_mat* matr);
+
+void print_vline(double* column, int lines);
+
+//void print_column(double* column, int lines)
 ///                         ***************************************************
 
 
@@ -55,10 +61,11 @@ void print_matrix2(ready_mat* matr);
 /// for determinant:        ***************************************************
 
 
-double** to_triangle(data** matrix, int n);
+ready_mat* to_triangle(ready_mat* matr);
 
-double triangle_det(double** matrix, int n);
-
+#if(0)
+double triangle_det(ready_mat* matr);
+#endif
 
 ///                         ***************************************************
 
@@ -71,14 +78,16 @@ double triangle_det(double** matrix, int n);
 
 /// for Ghauss              ***************************************************     
 
-double** triangle_expanded(double** matrix, int lines);
+ready_mat* triangle_expanded(ready_mat* matr);
 
 
-double** to_diagonal(double** matrix, int lines);
+ready_mat* to_diagonal      (ready_mat* matr);
 
 
-double* solve_diagonal(double** matrix, int lines);
+double* solve_diagonal		(ready_mat* matr);
 
+
+void solve_syst             (ready_mat* matr);
 ///                         *************************************************** 
 
 
@@ -114,10 +123,10 @@ void change_matrix(ready_mat* matr);
 /// for Cramer              ***************************************************
 // functions for calculating the determinant are required.
 
-double** expand_mat(double** matrix, int lines, int except);
+ready_mat* expand_mat(ready_mat* matr, int except);
 
 
-double det_expanded(double** matrix, int lines, int except);
+double det_expanded(ready_mat* matr, int except);
 
 
 double* solve_line_syst3(double** matrix, int lines);
